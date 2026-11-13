@@ -7,6 +7,7 @@ Multi-objective planning for improving a synthetic undergraduate engineering pro
 ## Contents
 
 - [Overview](#overview)
+- [Quick start: run the app](#quick-start-run-the-app)
 - [The problem in detail](#the-problem-in-detail)
 - [Mathematical formulation](#mathematical-formulation)
 - [Why the objectives conflict](#why-the-objectives-conflict)
@@ -28,6 +29,125 @@ Programme leaders and accreditation committees make the resource-allocation deci
 With 45 actions and integer upper bounds, the medium instance contains more than $3.5 \times 10^{13}$ possible plans before constraints are applied. Exhaustive search is therefore unsuitable; exact optimization and multi-objective heuristics provide complementary views of the trade-offs.
 
 The final medium-instance benchmark uses the dense MILP front as the yardstick. The dense front has 29 plans and hypervolume 0.167292 under the final benchmark normalization. Across 30 seeds, SPEA2 has mean hypervolume 0.134144, Hybrid-Memetic without MILP seeding 0.131149, NSGA-II 0.117350, NSGA-II+Corner 0.121401, and MOEA/D 0.112465. Random and Greedy-Baseline produce almost no feasible plans; GreedyRepaired is feasible on a small fraction of its samples. These comparisons are quality indicators for the synthetic instance, not institutional recommendations.
+
+## Quick start: run the app
+
+Follow these steps to try the Streamlit app. If you have never used Python tools before, the commands below create a private project environment so the app's packages do not affect other Python projects.
+
+1. **Check what you need.** Install Python 3.11 or newer, Git, and about 2 GB of free disk space. No database or separate backend is needed, and no internet connection is needed after installation: the interface and optimizer run together in the Streamlit app, `app.py`.
+
+   ```text
+   python --version
+   ```
+
+   This prints your Python version; it should be 3.11 or newer.
+
+2. **Get the code.**
+
+   ```text
+   git clone https://github.com/dhruvlad1/NBA-Accreditation-Improvement.git
+   ```
+
+   This downloads the project into a new folder named `NBA-Accreditation-Improvement`.
+
+   ```text
+   cd NBA-Accreditation-Improvement
+   ```
+
+   This moves into the project folder, where the remaining commands should be run.
+
+3. **Create and activate a virtual environment.** Choose the commands for your computer:
+
+   **Windows PowerShell**
+
+   ```powershell
+   python -m venv .venv
+   ```
+
+   This creates the project's private Python environment in `.venv`.
+
+   ```powershell
+   .venv\Scripts\activate
+   ```
+
+   This activates that environment; the prompt should now start with `(.venv)`.
+
+   > **Note:** If Windows says “running scripts is disabled”, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then retry the activation command.
+
+   **macOS or Linux**
+
+   ```bash
+   python3 -m venv .venv
+   ```
+
+   This creates the project's private Python environment in `.venv`.
+
+   ```bash
+   source .venv/bin/activate
+   ```
+
+   This activates that environment; the prompt should now start with `(.venv)`.
+
+4. **Install the requirements.**
+
+   ```text
+   pip install -r requirements.txt
+   ```
+
+   This installs Streamlit and the other packages the app needs; the command should finish without an error.
+
+5. **Start the app.**
+
+   ```text
+   streamlit run app.py
+   ```
+
+   This starts the app and should open `http://localhost:8501` in your browser; if it does not, open that address manually. Stop the app with `Ctrl+C` in the terminal.
+
+6. **Use the app.** In the sidebar, use the **Configuration Profile** dropdown:
+
+   - `experiments/config.yaml` is the medium instance with 45 actions and is slower.
+   - `experiments/config_small.yaml` and `experiments/config_small_f4.yaml` are small, quick instances.
+
+   Start with a small profile. A full run on the medium profile can take several minutes. The six tabs show:
+
+   - **Executive Overview**: accreditation status and gap analysis.
+   - **Action Catalog & Schedule**: the action catalog and critical-path schedule.
+   - **Optimization Studio**: optimization runs and results.
+   - **Pareto Frontiers & Trade-offs**: competing solution trade-offs.
+   - **Implementation Roadmap**: the selected plan and implementation details.
+   - **What-If Scenario Simulator**: interactive scenario changes.
+
+7. **Optional: run the optimizer without the interface.** These commands use the research CLI; see [How to reproduce](#how-to-reproduce) for the broader research workflow.
+
+   ```text
+   python main.py
+   ```
+
+   This runs the default benchmark and writes results under `results/` and figures under `figures/`.
+
+   ```text
+   python main.py --algorithm SPEA2 --no-plot
+   ```
+
+   This runs only SPEA2 without generating plots.
+
+   ```text
+   python main.py --config experiments/config_small.yaml --seeds 0 1 2
+   ```
+
+   This runs the small configuration with seeds 0, 1, and 2. Available algorithm names are NSGA-II, SPEA2, MOEA/D, Hybrid-Memetic, HiGHS, Greedy, and Random.
+
+### Troubleshooting
+
+| Problem | Cause | Fix |
+|---|---|---|
+| `streamlit` is not recognized | The virtual environment is not active, or the requirements are not installed. | Activate `.venv`, then run `pip install -r requirements.txt`. |
+| `ModuleNotFoundError` | The virtual environment is not active, or the requirements are not installed. | Activate `.venv`, then run `pip install -r requirements.txt`. |
+| Port 8501 is already in use | Another app is using Streamlit's default port. | Run `streamlit run app.py --server.port 8502`, then open `http://localhost:8502`. |
+| The browser page stays blank or shows an error | The terminal has the useful error message, or the selected run is too large for the first try. | Read the message in the terminal and switch to a small profile. |
+| Running the full `pytest` rewrites data files on Windows because of line endings | Windows and the test-generated files use different line-ending styles. | Run `pytest -q --deselect tests/test_data.py::test_generator_is_deterministic`; if `data/` was modified, run `git checkout -- data/`. |
+| The sidebar icon is missing offline | The optional icon image cannot be loaded without internet access. | This is harmless; the app can still be used. |
 
 ## The problem in detail
 
