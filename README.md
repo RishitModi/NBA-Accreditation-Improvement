@@ -34,13 +34,13 @@ The final medium-instance benchmark uses the dense MILP front as the yardstick. 
 
 Follow these steps to try the Streamlit app. If you have never used Python tools before, the commands below create a private project environment so the app's packages do not affect other Python projects.
 
-1. **Check what you need.** Install Python 3.11 or newer, Git, and about 2 GB of free disk space. No database or separate backend is needed, and no internet connection is needed after installation: the interface and optimizer run together in the Streamlit app, `app.py`.
+1. **Check what you need.** Install Python 3.12 or newer, Git, and about 2 GB of free disk space. No database or separate backend is needed, and no internet connection is needed after installation: the interface and optimizer run together in the Streamlit app, `app.py`.
 
    ```text
    python --version
    ```
 
-   This prints your Python version; it should be 3.11 or newer.
+   This prints your Python version; it should be 3.12 or newer.
 
 2. **Get the code.**
 
