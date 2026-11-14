@@ -1,5 +1,9 @@
 # NBA Accreditation Improvement Planning
 
+[![Open the live app](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://nba-accreditation-improvement-optimizer.streamlit.app/)
+
+**Live demo:** https://nba-accreditation-improvement-optimizer.streamlit.app/ (free hosting: if the app has been idle it may need a minute to wake up; the small configuration profile is recommended online).
+
 Multi-objective planning for improving a synthetic undergraduate engineering programme's NBA accreditation profile under cost, faculty-time, scheduling, and prerequisite constraints.
 
 > **Synthetic-data notice:** Institutional parameters, actions, profile marks, and benchmark instances in this repository are synthetic. They are for research and educational benchmarking, not a forecast of any institution's real NBA marks.
@@ -31,6 +35,8 @@ With 45 actions and integer upper bounds, the medium instance contains more than
 The final medium-instance benchmark uses the dense MILP front as the yardstick. The dense front has 29 plans and hypervolume 0.167292 under the final benchmark normalization. Across 30 seeds, SPEA2 has mean hypervolume 0.134144, Hybrid-Memetic without MILP seeding 0.131149, NSGA-II 0.117350, NSGA-II+Corner 0.121401, and MOEA/D 0.112465. Random and Greedy-Baseline produce almost no feasible plans; GreedyRepaired is feasible on a small fraction of its samples. These comparisons are quality indicators for the synthetic instance, not institutional recommendations.
 
 ## Quick start: run the app
+
+> **Just want to try it?** Open the [live app](https://nba-accreditation-improvement-optimizer.streamlit.app/) in your browser. No installation is needed. Follow the steps below only if you want to run it on your own computer.
 
 Follow these steps to try the Streamlit app. If you have never used Python tools before, the commands below create a private project environment so the app's packages do not affect other Python projects.
 
