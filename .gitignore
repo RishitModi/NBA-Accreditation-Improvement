@@ -38,3 +38,8 @@ Thumbs.db
 
 # Secrets / local config
 .env
+
+# Custom department input temp files
+experiments/.custom_cfg_*.yaml
+data/.custom_prof_*.csv
+
