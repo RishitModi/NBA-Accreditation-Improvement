@@ -34,6 +34,13 @@ from src.metrics import (
     compute_spread,
 )
 from src.problem import Action, Criterion, EvaluationResult, NBAProblem
+from src.recommendation import (
+    action_steps,
+    criterion_table,
+    key_insights,
+    plan_memo_markdown,
+    phases,
+)
 
 # Configure Streamlit page
 st.set_page_config(
@@ -1624,6 +1631,7 @@ elif step == "compare":
         # Quick-pick archetype buttons
         st.markdown("##### Quick picks")
         st.caption("Choose a plan based on what matters most to you, or scroll down to explore all plans.")
+        st.markdown("Not sure which to pick? 'Most even progress' is a good default for most departments.")
         qp_col1, qp_col2, qp_col3 = st.columns(3)
 
         pick_score = _pick_archetype(all_sols_flat_cmp, "score", problem.min_accreditation_score)
@@ -1678,108 +1686,118 @@ elif step == "compare":
                 })
         df_plot = pd.DataFrame(plot_rows)
 
+        # Plan table stays near the quick picks, above the advanced charts.
+        with st.expander("View every plan in a table", expanded=False):
+            st.dataframe(
+                df_plot[["Solution ID", "Algorithm", "Total Score", "Cost (Lakh)", "Faculty Hours",
+                          "Subject Balance", "Active Actions", "Feasible"]],
+                use_container_width=True,
+                height=300,
+            )
+
         # Resolve current selection for highlight
         sel_resolved = _resolve_selected_plan(problem)
 
-        # 2D charts (primary view)
-        st.markdown("##### Trade-off charts")
-        p_col1, p_col2 = st.columns(2)
-
-        with p_col1:
-            fig_2d_1 = px.scatter(
-                df_plot,
-                x="Cost (Lakh)",
-                y="Total Score",
-                color="Algorithm",
-                hover_name="Solution ID",
-                hover_data=["Faculty Hours", "Subject Balance"],
-                title="Total Score vs. Implementation Cost",
-            )
-            fig_2d_1.add_vline(x=problem.budget, line_dash="dash", line_color="red",
-                                annotation_text=f"Budget limit ₹{problem.budget}L")
-            fig_2d_1.add_hline(y=problem.min_accreditation_score, line_dash="dash", line_color="green",
-                                annotation_text=f"Target score {problem.min_accreditation_score:.0f}")
-            if sel_resolved:
-                _, sel_ev = sel_resolved
-                fig_2d_1.add_trace(go.Scatter(
-                    x=[sel_ev.f2_cost_lakh], y=[sel_ev.f1_total_score],
-                    mode="markers",
-                    marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
-                    name="Your choice",
-                    showlegend=True,
-                ))
-            fig_2d_1.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
-            st.plotly_chart(fig_2d_1, use_container_width=True)
-            st.caption("Higher score is better (top). Lower cost is better (left of red budget limit).")
-
-            fig_2d_3 = px.scatter(
-                df_plot,
-                x="Cost (Lakh)",
-                y="Subject Balance",
-                color="Algorithm",
-                hover_name="Solution ID",
-                title="Subject Balance vs. Implementation Cost",
-            )
-            fig_2d_3.add_vline(x=problem.budget, line_dash="dash", line_color="red")
-            if sel_resolved:
-                _, sel_ev = sel_resolved
-                fig_2d_3.add_trace(go.Scatter(
-                    x=[sel_ev.f2_cost_lakh], y=[sel_ev.f4_worst_criterion_ratio],
-                    mode="markers",
-                    marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
-                    name="Your choice",
-                    showlegend=True,
-                ))
-            fig_2d_3.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
-            st.plotly_chart(fig_2d_3, use_container_width=True)
-            st.caption("Higher subject balance is better (top). Lower cost is better (left of red budget limit).")
-
-        with p_col2:
-            fig_2d_2 = px.scatter(
-                df_plot,
-                x="Faculty Hours",
-                y="Total Score",
-                color="Algorithm",
-                hover_name="Solution ID",
-                title="Total Score vs. Faculty Hours",
-            )
-            fig_2d_2.add_hline(y=problem.min_accreditation_score, line_dash="dash", line_color="green")
-            if sel_resolved:
-                _, sel_ev = sel_resolved
-                fig_2d_2.add_trace(go.Scatter(
-                    x=[sel_ev.f3_faculty_hours], y=[sel_ev.f1_total_score],
-                    mode="markers",
-                    marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
-                    name="Your choice",
-                    showlegend=True,
-                ))
-            fig_2d_2.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
-            st.plotly_chart(fig_2d_2, use_container_width=True)
-            st.caption("Higher score is better (top). Fewer faculty hours is better (left).")
-
-            fig_2d_4 = px.scatter(
-                df_plot,
-                x="Faculty Hours",
-                y="Subject Balance",
-                color="Algorithm",
-                hover_name="Solution ID",
-                title="Subject Balance vs. Faculty Hours",
-            )
-            if sel_resolved:
-                _, sel_ev = sel_resolved
-                fig_2d_4.add_trace(go.Scatter(
-                    x=[sel_ev.f3_faculty_hours], y=[sel_ev.f4_worst_criterion_ratio],
-                    mode="markers",
-                    marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
-                    name="Your choice",
-                    showlegend=True,
-                ))
-            fig_2d_4.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
-            st.plotly_chart(fig_2d_4, use_container_width=True)
-            st.caption("Higher subject balance is better (top). Fewer faculty hours is better (left).")
-
-        # 3D view in expander
-        with st.expander("3D view (optional)", expanded=False):
+        with st.expander("Explore all trade-offs (advanced)", expanded=False):
+            # 2D charts (primary view)
+            st.markdown("##### Trade-off charts")
+            p_col1, p_col2 = st.columns(2)
+    
+            with p_col1:
+                fig_2d_1 = px.scatter(
+                    df_plot,
+                    x="Cost (Lakh)",
+                    y="Total Score",
+                    color="Algorithm",
+                    hover_name="Solution ID",
+                    hover_data=["Faculty Hours", "Subject Balance"],
+                    title="Total Score vs. Implementation Cost",
+                )
+                fig_2d_1.add_vline(x=problem.budget, line_dash="dash", line_color="red",
+                                    annotation_text=f"Budget limit ₹{problem.budget}L")
+                fig_2d_1.add_hline(y=problem.min_accreditation_score, line_dash="dash", line_color="green",
+                                    annotation_text=f"Target score {problem.min_accreditation_score:.0f}")
+                if sel_resolved:
+                    _, sel_ev = sel_resolved
+                    fig_2d_1.add_trace(go.Scatter(
+                        x=[sel_ev.f2_cost_lakh], y=[sel_ev.f1_total_score],
+                        mode="markers",
+                        marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
+                        name="Your choice",
+                        showlegend=True,
+                    ))
+                fig_2d_1.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
+                st.plotly_chart(fig_2d_1, use_container_width=True)
+                st.caption("Higher score is better (top). Lower cost is better (left of red budget limit).")
+    
+                fig_2d_3 = px.scatter(
+                    df_plot,
+                    x="Cost (Lakh)",
+                    y="Subject Balance",
+                    color="Algorithm",
+                    hover_name="Solution ID",
+                    title="Subject Balance vs. Implementation Cost",
+                )
+                fig_2d_3.add_vline(x=problem.budget, line_dash="dash", line_color="red")
+                if sel_resolved:
+                    _, sel_ev = sel_resolved
+                    fig_2d_3.add_trace(go.Scatter(
+                        x=[sel_ev.f2_cost_lakh], y=[sel_ev.f4_worst_criterion_ratio],
+                        mode="markers",
+                        marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
+                        name="Your choice",
+                        showlegend=True,
+                    ))
+                fig_2d_3.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
+                st.plotly_chart(fig_2d_3, use_container_width=True)
+                st.caption("Higher subject balance is better (top). Lower cost is better (left of red budget limit).")
+    
+            with p_col2:
+                fig_2d_2 = px.scatter(
+                    df_plot,
+                    x="Faculty Hours",
+                    y="Total Score",
+                    color="Algorithm",
+                    hover_name="Solution ID",
+                    title="Total Score vs. Faculty Hours",
+                )
+                fig_2d_2.add_hline(y=problem.min_accreditation_score, line_dash="dash", line_color="green")
+                if sel_resolved:
+                    _, sel_ev = sel_resolved
+                    fig_2d_2.add_trace(go.Scatter(
+                        x=[sel_ev.f3_faculty_hours], y=[sel_ev.f1_total_score],
+                        mode="markers",
+                        marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
+                        name="Your choice",
+                        showlegend=True,
+                    ))
+                fig_2d_2.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
+                st.plotly_chart(fig_2d_2, use_container_width=True)
+                st.caption("Higher score is better (top). Fewer faculty hours is better (left).")
+    
+                fig_2d_4 = px.scatter(
+                    df_plot,
+                    x="Faculty Hours",
+                    y="Subject Balance",
+                    color="Algorithm",
+                    hover_name="Solution ID",
+                    title="Subject Balance vs. Faculty Hours",
+                )
+                if sel_resolved:
+                    _, sel_ev = sel_resolved
+                    fig_2d_4.add_trace(go.Scatter(
+                        x=[sel_ev.f3_faculty_hours], y=[sel_ev.f4_worst_criterion_ratio],
+                        mode="markers",
+                        marker=dict(size=16, color="gold", line=dict(color="black", width=2)),
+                        name="Your choice",
+                        showlegend=True,
+                    ))
+                fig_2d_4.update_layout(margin=dict(l=20, r=20, t=35, b=20), height=320)
+                st.plotly_chart(fig_2d_4, use_container_width=True)
+                st.caption("Higher subject balance is better (top). Fewer faculty hours is better (left).")
+    
+            # 3D trade-off view
+            st.markdown("##### 3D view")
             fig_3d = px.scatter_3d(
                 df_plot,
                 x="Cost (Lakh)",
@@ -1802,16 +1820,7 @@ elif step == "compare":
                 height=500,
             )
             st.plotly_chart(fig_3d, use_container_width=True)
-
-        # Full table in expander
-        with st.expander("See every plan in a table", expanded=False):
-            st.dataframe(
-                df_plot[["Solution ID", "Algorithm", "Total Score", "Cost (Lakh)", "Faculty Hours",
-                          "Subject Balance", "Active Actions", "Feasible"]],
-                use_container_width=True,
-                height=300,
-            )
-
+    
         # Plan chooser
         st.markdown("---")
         with st.container(border=True):
@@ -2057,7 +2066,74 @@ elif step == "plan":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # Clear, actionable recommendation
+    st.markdown("### Recommended upgrade plan: what your department should do")
+    difference = active_eval.f1_total_score - problem.min_accreditation_score
+    if difference >= 0:
+        headline = (
+            f"This plan raises the department to {active_eval.f1_total_score:.0f} marks, "
+            f"{difference:.0f} marks above the {problem.min_accreditation_score:.0f}-mark target."
+        )
+    else:
+        headline = (
+            f"This plan raises the department to {active_eval.f1_total_score:.0f} marks, "
+            f"but remains {abs(difference):.0f} marks below the {problem.min_accreditation_score:.0f}-mark target."
+        )
+    st.markdown(headline)
+
+    st.markdown("#### Where the marks come from")
+    table_rows = criterion_table(problem, active_eval)
+    df_recommendation = pd.DataFrame([
+        {
+            "Criterion": f"C{row['criterion_number']} - {row['name']}",
+            "Current": row["current_marks"],
+            "After plan": row["marks_after"],
+            "Maximum": row["maximum"],
+            "Minimum": row["minimum_level"],
+            "Status": row["status"],
+            "Gain": row["gain"],
+        }
+        for row in table_rows
+    ])
+    st.dataframe(df_recommendation, use_container_width=True, hide_index=True)
+
+    st.markdown("#### Your action plan, step by step")
+    recommendation_steps = action_steps(problem, active_eval)
+    recommendation_phases = phases(recommendation_steps)
+    if recommendation_phases:
+        for index, phase in enumerate(recommendation_phases):
+            heading = (
+                f"{phase['heading']} - {phase['action_count']} actions, "
+                f"Rs {phase['cost']:.1f} lakh, {phase['faculty_hours']:.0f} faculty hours"
+            )
+            with st.expander(heading, expanded=(index == 0)):
+                for step in phase["steps"]:
+                    plain_instruction = step["instruction"].replace(
+                        f"**{step['name']}**",
+                        step["name"],
+                    )
+                    st.markdown(
+                        f"**{step['step_number']}. {step['action_id']}: {step['name']}**  \n"
+                        f"{plain_instruction}"
+                    )
+    else:
+        st.info("No improvement actions are selected in this plan.")
+
+    st.markdown("#### What to watch out for")
+    for insight in key_insights(problem, active_eval):
+        st.markdown(f"- {insight}")
+
+    memo = plan_memo_markdown(problem, active_eval, plan_title)
+    st.download_button(
+        "Download action plan (Markdown)",
+        data=memo.encode("utf-8"),
+        file_name="NBA_Action_Plan.md",
+        mime="text/markdown",
+        use_container_width=True,
+    )
+
     # Radar Chart & Monthly Workload
+    st.markdown("## Detailed data and charts")
     st.markdown("##### Where the improvement comes from")
     st.caption("Comparison of your baseline, the minimum required score, and your projected score across all 10 criteria.")
     r_col1, r_col2 = st.columns([1, 1])
