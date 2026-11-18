@@ -35,6 +35,7 @@ from src.metrics import (
 )
 from src.problem import Action, Criterion, EvaluationResult, NBAProblem
 from src.recommendation import (
+    _feasibility_reasons,
     action_steps,
     criterion_table,
     key_insights,
@@ -587,8 +588,10 @@ def _pick_archetype(
     Extract existing archetype logic from the plan stage.
     kind: 'score' | 'cost' | 'balance'
     """
-    if not all_sols_flat:
+    feasible_solutions = [(alg, sol) for alg, sol in all_sols_flat if sol.is_feasible]
+    if not feasible_solutions:
         return None
+    all_sols_flat = feasible_solutions
     if kind == "score":
         sorted_f1 = sorted(all_sols_flat, key=lambda pair: pair[1].f1_total_score, reverse=True)
         return sorted_f1[0]
@@ -774,6 +777,10 @@ if step == "status":
                 key="_dataset_selector_widget",
                 format_func=lambda p: _get_dataset_name(p, problem.num_actions if p == st.session_state.get("active_config") else None),
                 on_change=_on_config_change,
+            )
+            st.caption(
+                "The full dataset can take several minutes on the free online version. "
+                "Choose the small dataset for a quick demo."
             )
         with cfg_col2:
             covered_crits = set(a.crit_id for a in problem.actions)
@@ -1637,6 +1644,12 @@ elif step == "compare":
         pick_score = _pick_archetype(all_sols_flat_cmp, "score", problem.min_accreditation_score)
         pick_cost  = _pick_archetype(all_sols_flat_cmp, "cost",  problem.min_accreditation_score)
         pick_bal   = _pick_archetype(all_sols_flat_cmp, "balance", problem.min_accreditation_score)
+        feasible_cmp = [pair for pair in all_sols_flat_cmp if pair[1].is_feasible]
+        if not feasible_cmp:
+            st.warning(
+                "This plan does not meet all requirements. Go back and generate plans with the "
+                "Balanced or Thorough preset, or add the Exact mathematical solver, then choose again."
+            )
 
         with qp_col1:
             if st.button("Highest score", use_container_width=True, disabled=pick_score is None):
@@ -1992,22 +2005,22 @@ elif step == "plan":
         st.stop()
 
     # Plain-English verdict line
-    score_ok = active_eval.f1_total_score >= problem.min_accreditation_score - 1e-4
-    cost_ok = active_eval.f2_cost_lakh <= problem.budget + 1e-4
     max_hours = float(np.max(active_eval.monthly_hours)) if hasattr(active_eval, "monthly_hours") else 0.0
-    workload_ok = max_hours <= problem.monthly_capacity + 1e-4
-
-    if score_ok and cost_ok and workload_ok:
+    if active_eval.is_feasible:
         st.success(
             f"This plan raises your score to **{active_eval.f1_total_score:.0f}** (target {problem.min_accreditation_score:.0f}), "
-            f"costs **₹{active_eval.f2_cost_lakh:.2f} Lakh** (within the ₹{problem.budget:.1f} Lakh budget), and "
-            f"requires at most **{max_hours:.0f} faculty hours** in any month (capacity {problem.monthly_capacity:.0f} hrs)."
+            f"costs **₹{active_eval.f2_cost_lakh:.2f} Lakh** (within the ₹{problem.budget:.1f} Lakh budget), "
+            f"and requires at most **{max_hours:.0f} faculty hours** in any month "
+            f"(capacity {problem.monthly_capacity:.0f} hrs)."
         )
     else:
-        score_note = f"raises your score to **{active_eval.f1_total_score:.0f}** (target {problem.min_accreditation_score:.0f})" if score_ok else f"reaches score **{active_eval.f1_total_score:.0f}** (short of {problem.min_accreditation_score:.0f} target)"
-        cost_note = f"costs **₹{active_eval.f2_cost_lakh:.2f} Lakh** (within budget)" if cost_ok else f"costs **₹{active_eval.f2_cost_lakh:.2f} Lakh** (exceeds ₹{problem.budget:.1f} Lakh budget)"
-        load_note = f"peak workload is **{max_hours:.0f} faculty hours/month** (within capacity)" if workload_ok else f"peak workload is **{max_hours:.0f} faculty hours/month** (exceeds {problem.monthly_capacity:.0f} hrs capacity)"
-        st.warning(f"This plan {score_note}, {cost_note}, and {load_note}.")
+        reason_lines = _feasibility_reasons(problem, active_eval)
+        st.error(
+            "This plan does not meet all requirements.\n\n"
+            + "\n".join(f"- {reason}" for reason in reason_lines)
+            + "\n\nGo back and generate plans with the Balanced or Thorough preset, "
+              "or add the Exact mathematical solver, then choose again."
+        )
 
     # Plan Summary KPIs (At a glance)
     st.markdown("##### At a glance")
@@ -2069,7 +2082,9 @@ elif step == "plan":
     # Clear, actionable recommendation
     st.markdown("### Recommended upgrade plan: what your department should do")
     difference = active_eval.f1_total_score - problem.min_accreditation_score
-    if difference >= 0:
+    if not active_eval.is_feasible:
+        headline = "NOT FEASIBLE: this plan should not be selected until the requirements below are resolved."
+    elif difference >= 0:
         headline = (
             f"This plan raises the department to {active_eval.f1_total_score:.0f} marks, "
             f"{difference:.0f} marks above the {problem.min_accreditation_score:.0f}-mark target."
@@ -2227,8 +2242,9 @@ elif step == "plan":
                 "Marks Gain": a.score_gain * units,
                 "Cost (Lakh)": a.cost_lakh * units,
                 "Faculty Hours": a.faculty_hours * units,
-                "Start Month": a.earliest_start,
+                "Start Month": a.earliest_start + 1,
                 "Finish Month": a.earliest_finish,
+                "Gantt Start Month": a.earliest_start,
                 "Duration": max(1, a.duration_months),
                 "Prerequisites": ", ".join(a.prerequisites) if a.prerequisites else "None",
             })
@@ -2239,7 +2255,7 @@ elif step == "plan":
             df_active_actions,
             x="Duration",
             y="Action Name",
-            base="Start Month",
+            base="Gantt Start Month",
             color="Criterion",
             orientation="h",
             hover_data=["Units", "Cost (Lakh)", "Faculty Hours", "Marks Gain", "Start Month", "Finish Month"],

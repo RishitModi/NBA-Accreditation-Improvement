@@ -8,7 +8,10 @@ from src.problem import EvaluationResult, NBAProblem
 
 
 def _number(value: float, decimals: int = 1) -> str:
-    return f"{value:.{decimals}f}".rstrip("0").rstrip(".")
+    formatted = f"{value:.{decimals}f}"
+    if "." in formatted:
+        formatted = formatted.rstrip("0").rstrip(".")
+    return formatted
 
 
 def criterion_table(problem: NBAProblem, eval: EvaluationResult) -> List[Dict[str, object]]:
@@ -54,9 +57,10 @@ def action_steps(problem: NBAProblem, eval: EvaluationResult) -> List[Dict[str, 
         marks_gained = action.score_gain * units
         cost = action.cost_lakh * units
         faculty_hours = action.faculty_hours * units
+        start_month = action.earliest_start + 1
         if action.is_evidence:
             instruction = (
-                f"Start in month {action.earliest_start} and finish by month "
+                f"Start in month {start_month} and finish by month "
                 f"{action.earliest_finish}: **{action.name}**. "
                 f"Prepare and file the documented evidence for criterion "
                 f"{action.crit_id}; marks for the other actions in this criterion "
@@ -64,7 +68,7 @@ def action_steps(problem: NBAProblem, eval: EvaluationResult) -> List[Dict[str, 
             )
         else:
             instruction = (
-                f"Start in month {action.earliest_start} and finish by month "
+                f"Start in month {start_month} and finish by month "
                 f"{action.earliest_finish}: **{action.name}**. "
                 f"It adds {_number(marks_gained)} marks to {criterion.name}, "
                 f"costs Rs {_number(cost)} lakh and needs about "
@@ -82,7 +86,7 @@ def action_steps(problem: NBAProblem, eval: EvaluationResult) -> List[Dict[str, 
             "marks_gained": marks_gained,
             "cost": cost,
             "faculty_hours": faculty_hours,
-            "start_month": action.earliest_start,
+            "start_month": start_month,
             "finish_month": action.earliest_finish,
             "prerequisites": prereq_words,
             "is_evidence_package": action.is_evidence,
@@ -103,7 +107,7 @@ def phases(steps: List[Dict[str, object]]) -> List[Dict[str, object]]:
     grouped: Dict[int, List[Dict[str, object]]] = {}
     for step in steps:
         start = int(step["start_month"])
-        phase_number = ((max(1, start) - 1) // 3) + 1
+        phase_number = ((start - 1) // 3) + 1
         grouped.setdefault(phase_number, []).append(step)
 
     result = []
@@ -113,7 +117,10 @@ def phases(steps: List[Dict[str, object]]) -> List[Dict[str, object]]:
         last_month = phase_number * 3
         result.append({
             "phase_number": phase_number,
-            "heading": f"Phase {phase_number}: months {first_month}-{last_month}",
+            "heading": (
+                f"Phase {phase_number}: months {first_month}-{last_month} "
+                f"({len(phase_steps)} {'action' if len(phase_steps) == 1 else 'actions'})"
+            ),
             "action_count": len(phase_steps),
             "cost": sum(float(step["cost"]) for step in phase_steps),
             "faculty_hours": sum(float(step["faculty_hours"]) for step in phase_steps),
@@ -122,8 +129,70 @@ def phases(steps: List[Dict[str, object]]) -> List[Dict[str, object]]:
     return result
 
 
+def _missing_evidence_action_ids(problem: NBAProblem, eval: EvaluationResult) -> List[str]:
+    missing = []
+    for action in problem.actions:
+        if int(eval.x[action.index]) <= 0 or action.is_evidence:
+            continue
+        evidence_present = any(
+            int(eval.x[evidence.index]) > 0
+            for evidence in problem.actions
+            if evidence.crit_id == action.crit_id and evidence.is_evidence
+        )
+        if not evidence_present:
+            missing.append(action.action_id)
+    return sorted(set(missing))
+
+
+def _feasibility_reasons(problem: NBAProblem, eval: EvaluationResult) -> List[str]:
+    reasons: List[str] = []
+    if eval.f1_total_score < problem.min_accreditation_score - 1e-9:
+        reasons.append(
+            f"Score is {_number(eval.f1_total_score)} marks, "
+            f"{_number(problem.min_accreditation_score - eval.f1_total_score)} marks below "
+            f"the required {_number(problem.min_accreditation_score)}."
+        )
+    if eval.f2_cost_lakh > problem.budget + 1e-9:
+        reasons.append(
+            f"Budget is exceeded: the plan costs Rs {_number(eval.f2_cost_lakh)} lakh "
+            f"against a {_number(problem.budget)} lakh budget."
+        )
+    for month, hours in enumerate(eval.monthly_hours, start=1):
+        if float(hours) > problem.monthly_capacity + 1e-9:
+            reasons.append(
+                f"Monthly faculty capacity is exceeded in month {month}: "
+                f"{_number(float(hours), 0)} hours against "
+                f"{_number(problem.monthly_capacity, 0)} hours."
+            )
+    if float(eval.violations.get("deadline", 0.0)) > 1e-9:
+        reasons.append("A selected action misses the planning deadline.")
+    if float(eval.violations.get("prerequisites", 0.0)) > 1e-9:
+        reasons.append("A prerequisite requirement is missing.")
+    missing_evidence = _missing_evidence_action_ids(problem, eval)
+    if missing_evidence:
+        reasons.append(
+            "Required evidence is missing for selected actions: "
+            + ", ".join(missing_evidence)
+            + "."
+        )
+    for criterion in problem.criteria:
+        idx = criterion.id - 1
+        score = float(eval.criteria_scores[idx])
+        minimum = float(problem.L[idx])
+        if score < minimum - 1e-9:
+            reasons.append(
+                f"{criterion.name} is {_number(score)} marks, below its minimum "
+                f"of {_number(minimum)} marks."
+            )
+    return reasons
+
+
 def key_insights(problem: NBAProblem, eval: EvaluationResult) -> List[str]:
     notes: List[str] = []
+    if not eval.is_feasible:
+        notes.append("NOT FEASIBLE")
+        for reason in _feasibility_reasons(problem, eval):
+            notes.append(reason)
     baseline_total = float(sum(problem.s0))
     plan_added = eval.f1_total_score - baseline_total
     target_difference = eval.f1_total_score - problem.min_accreditation_score
@@ -164,7 +233,7 @@ def key_insights(problem: NBAProblem, eval: EvaluationResult) -> List[str]:
     criterion_gains.sort(key=lambda item: (-item[0], item[1].id))
     if criterion_gains:
         gains_text = ", ".join(
-            f"C{criterion.id} {_number(gain)}"
+            f"{criterion.name} +{_number(gain)} marks"
             for gain, criterion in criterion_gains[:3]
         )
         notes.append(f"The criteria gaining the most are: {gains_text}.")
@@ -224,6 +293,11 @@ def key_insights(problem: NBAProblem, eval: EvaluationResult) -> List[str]:
 
 def plan_memo_markdown(problem: NBAProblem, eval: EvaluationResult, title: str) -> str:
     lines = [f"# {title}", "", "## Recommended upgrade plan", ""]
+    if not eval.is_feasible:
+        lines.append("NOT FEASIBLE")
+        for reason in _feasibility_reasons(problem, eval):
+            lines.append(f"- {reason}")
+        lines.append("")
     added = eval.f1_total_score - float(sum(problem.s0))
     difference = eval.f1_total_score - problem.min_accreditation_score
     if difference >= 0:
@@ -256,7 +330,7 @@ def plan_memo_markdown(problem: NBAProblem, eval: EvaluationResult, title: str) 
     lines.extend(["", "## Your action plan, step by step", ""])
     for phase in phases(action_steps(problem, eval)):
         lines.append(
-            f"### {phase['heading']} - {phase['action_count']} actions, "
+            f"### {phase['heading']} - "
             f"Rs {_number(float(phase['cost']))} lakh, "
             f"{_number(float(phase['faculty_hours']), 0)} faculty hours"
         )
