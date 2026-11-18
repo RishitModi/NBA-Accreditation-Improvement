@@ -2,16 +2,18 @@
 
 This project plans feasible NBA accreditation improvement actions with multi-objective optimization.
 The numbers below were computed from the reachable `HEAD` history using the git commands listed at the end; line counts exclude `results/`, `figures/`, and `data/*.csv`.
-Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa834845a2188`); this document's own commit is not included.
+Generated on 2026-11-18 from HEAD `0142fa5` (`0142fa58005bee01593f2dcd8e17ba11add71ac6`); this document's own commit is not included.
+
+Live app: https://nba-accreditation-improvement-optimizer.streamlit.app/
 
 ## Team at a glance
 
 | GitHub user | Role | Non-merge commits | Merge commits | Lines added / removed* | Active dates | Main areas |
 |---|---|---:|---:|---:|---|---|
 | [Tirth-1612](https://github.com/Tirth-1612) | Core architecture and algorithms | 8 | 0 | 4,513 / 0 | 2026-10-23 | formulation, algorithms, metrics, tests, visualization |
-| [RishitModi](https://github.com/RishitModi) | Data engineering and validation | 5 | 2 | 951 / 268 | 2026-10-24 | datasets, repair hardening, brute-force validation |
-| [kavish310107](https://github.com/kavish310107) | Frontend and decision support | 3 | 0 | 1,795 / 299 | 2026-10-28 | Streamlit, Plotly, configuration fixes |
-| [dhruvlad1](https://github.com/dhruvlad1) | Optimization, benchmarking, evaluation and release | 18 | 3 | 3,043 / 301 | 2026-11-02 to 2026-11-04 | benchmarks, profiling, references, statistics, documentation |
+| [RishitModi](https://github.com/RishitModi) | Data engineering, validation and frontend | 6 | 3 | 2,822 / 902 | 2026-10-24 to 2026-11-14 | datasets, repair hardening, brute-force validation, frontend rewrite |
+| [kavish310107](https://github.com/kavish310107) | Frontend and decision support | 3 | 1 | 1,795 / 299 | 2026-10-28 | Streamlit, Plotly, configuration fixes, contribution documentation |
+| [dhruvlad1](https://github.com/dhruvlad1) | Optimization, benchmarking, evaluation and release | 26 | 7 | 4,188 / 683 | 2026-11-02 to 2026-11-18 | benchmarks, profiling, references, statistics, documentation, deployment, recommendation |
 
 \* `Dhruv` and `Dhruv Lad` are the same person, and `kavish310107` and `Kavish Desai` are the same person. Counts are for commits reachable from `HEAD` on `main`.
 
@@ -24,6 +26,8 @@ Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa83484
 | Frontend | kavish310107 / Kavish Desai | 2026-10-28 | [`36badde`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/36badde6de0ed1aec4b354d8d983b2352b292c1d), [`4749c99`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/4749c99299622a01ea947bead37942080b52e70d), [`dca3818`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/dca3818f49b3f048b880c5e890bcadbabb6d14c6) |
 | Optimization and evaluation | dhruvlad1 | 2026-11-02 to 2026-11-04 | [`31392e3`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/31392e363bd066a94d75a41a2849aa8b81745350), [`5c6eeb5`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/5c6eeb56f7e6af881209a8459271e9aef1789fbd), [`44e4f00`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/44e4f000eb7eec002dc60e89c8fc5080c8b5d899) |
 | Documentation and release | dhruvlad1 | 2026-11-04 | [`43da14a`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/43da14a3c9aab4d7a69f9a79cb4a77cc5fe2a45d), [`407b66f`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/407b66ff3ab56eb412178fe0c45ad34df6c14926), [`1b376bd`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1b376bdd54c70dd3c65838f4eccfa834845a2188) |
+| Frontend rewrite and guided flow | RishitModi | 2026-11-14 | [`1582be4`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1582be4adc39a2b045ce87c827cff1156adb1ebe), [`1c56c68`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1c56c68f8afb969110309e56b923b5a96dfdf4c9) |
+| Release, deployment and decision-support page | dhruvlad1 | 2026-11-13 to 2026-11-18 | [`32850dc`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/32850dc8b643aa313cc01ed0571bcca2f81a2a95), [`f35e42f`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/f35e42f70e3aff414077be5b9b619b50d5b6d955), [`99a8bb8`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/99a8bb82746a8287fcb9c5e0860991565c99f524), [`588f77b`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/588f77b5dc17105306409ad92c5b398acf5d6b3e), [`2b513c1`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/2b513c1098cf97c7ee80e26a53deb6676d963ab4) |
 
 ## [@Tirth-1612](https://github.com/Tirth-1612)
 
@@ -84,6 +88,7 @@ Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa83484
 - Hardened capped scoring, feasibility checking, HiGHS formulation and repair behavior.
 - Added small exhaustive-validation instances and independent correctness oracles.
 - Updated documentation and merged the first two pull requests.
+- Rewrote the Streamlit frontend into a guided six-step decision flow and merged the rewrite through PR #7.
 
 <details>
 <summary>Detailed contributions</summary>
@@ -114,6 +119,18 @@ Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa83484
 5. **Documentation Update and PR Merges** — [`ac3737b`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/ac3737bd9d05988b7a5ddfb92000e0d8cb4a8375), [`5a9c0e8`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/5a9c0e8435c03f84099ab85671a13e41e8595fcc), [`879ca3a`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/879ca3afbc9e2713a4cc998901109b7e1f2769d0)
    - Updated `README.md` with the A12 criterion note, proposal criterion assignment versus SAR references 2.2.4/2.2.5, dataset disclaimer and corrected layout.
    - Merged PR [#1](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/pull/1) and PR [#2](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/pull/2) from `dhruvlad1/partial-week3` into `main`.
+6. **Frontend Rewrite into a Guided Decision Flow** — [`1582be4`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1582be4adc39a2b045ce87c827cff1156adb1ebe) (2026-11-14), merged through PR #7 as [`1c56c68`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1c56c68f8afb969110309e56b923b5a96dfdf4c9).
+   - In this commit, `app.py` changed by +1,871 / -634 lines (about 2,500 changed lines).
+   - Added `.python-version` with Python 3.12 for the hosted app and `.gitignore` changes of +5 lines for temporary custom-input files.
+   - Reworked `app.py` into a guided flow with six steps: landing page, department status, generate plans, compare and choose, your plan, and what-if simulator.
+   - Added full and small dataset choices, including the full 45-action dataset, the small 20-action dataset and the small dataset with continuous improvement.
+   - Added custom department inputs for budget, planning horizon, monthly faculty capacity and per-criterion current scores. These inputs are turned into temporary config and profile files, with cleanup for files older than 24 hours.
+   - Added Quick, Balanced and Thorough effort presets and a choice of optimization, exact-solver and baseline methods.
+   - Added quick-pick actions for highest score, lowest cost and most even progress.
+   - Added plan comparison tables and 2D/3D trade-off charts.
+   - Added a plan page with a criterion radar chart, monthly faculty-load chart, execution timeline and CSV/JSON downloads.
+   - Added the what-if sandbox with live constraint feedback and action-unit controls.
+   - Added a sidebar glossary for datasets, criteria, marks, baselines, targets, actions, evidence, prerequisites, plans and feasibility.
 
 </details>
 
@@ -158,6 +175,7 @@ Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa83484
 - Built an exact dense reference front and ran a 30-seed statistically tested comparison.
 - Added corner-targeted methods, ablation tooling and reproducible result figures.
 - Wrote the final README and release documentation.
+- Deployed the live Streamlit app and added the plain-English recommendation page.
 
 <details>
 <summary>Detailed contributions</summary>
@@ -173,6 +191,12 @@ Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa83484
 9. **Results data** — [`b739d27`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/b739d27cedce41f08e3c351c3fb025877c9b5c54): added `results/final_summary.csv`, `results/final_stats.csv` and `results/milp_dense_front.json`. SPEA2 was significantly better than NSGA-II on hypervolume (0.134 versus 0.117, Holm $p = 0.021$) and IGD; Hybrid-Memetic was better but not significant after correction ($p = 0.053$); CornerNSGA2 improved only the minimum-cost corner (Holm $p = 0.003$); MOEA/D found the best minimum hours; and the exact MILP front still had the highest hypervolume (0.167).
 10. **Documentation and release** — [`43da14a`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/43da14a3c9aab4d7a69f9a79cb4a77cc5fe2a45d) rewrote the README with GitHub-rendered formulas, an optimization timeline, results and `make_figures.py`; [`407b66f`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/407b66ff3ab56eb412178fe0c45ad34df6c14926) added result figures; [`e893cc0`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/e893cc0f5a3304df2cab7845daa46642d0ea6e5b), [`1b376bd`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1b376bdd54c70dd3c65838f4eccfa834845a2188) and [`23edf3b`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/23edf3b96270e757c1e55a0d9d0d600e89a6a04c) fixed GitHub math rendering in `README.md` and `report/report.md`; [`f4e2fbf`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/f4e2fbfb005da5ea7f8edfb38097ba218b99bf08c) restored LF line endings in `nsga2.py` and `greedy.py` without a code change.
 11. **Integration** — PR merges #4, #5 and #6 ([`409a7d5`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/409a7d5f4df97301b162a3bbed9a90e8cf8837ad), [`1164e79`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1164e79739296daa9478ef1528c967c3eaeb005a), [`4ebc667`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/4ebc66796724fc31ae8c5502beb6a3320879d41a)) were made as “Dhruv Lad”; [`f87abd1`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/f87abd1f53d340815ff0fb04dfa8a8758cb38b2c) merged `origin/main` into the working branch.
+12. **Beginner Quick-Start Guide** — [`32850dc`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/32850dc8b643aa313cc01ed0571bcca2f81a2a95) (2026-11-13): added 120 lines to `README.md` with step-by-step installation and run instructions and a troubleshooting table.
+13. **Reproducible Dependencies** — [`f35e42f`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/f35e42f70e3aff414077be5b9b619b50d5b6d955) (2026-11-14): pinned tested versions in `requirements.txt`, including NumPy 2.5.4, SciPy 1.18.1, pandas 3.1.0, matplotlib 3.11.2, pymoo 0.6.2, PyYAML 6.0.3, streamlit 1.66.1 and plotly 7.1.0. The documented Python requirement was raised to 3.12 or newer because NumPy 2.5 and SciPy 1.18 require it.
+14. **Deployment** — [`99a8bb8`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/99a8bb82746a8287fcb9c5e0860991565c99f524) (2026-11-14): deployed the app on Streamlit Community Cloud from the main branch and added the live link and badge to `README.md`.
+15. **Results Refresh** — [`588f77b`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/588f77b5dc17105306409ad92c5b398acf5d6b3e) (2026-11-18): updated `results/final_summary.csv`.
+16. **Decision-Support Recommendation Page** — [`2b513c1`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/2b513c1098cf97c7ee80e26a53deb6676d963ab4) (2026-11-18): added `src/recommendation.py` (+273), `tests/test_recommendation.py` (+50), and changes of +292 / -108 in `app.py` across the “Your plan” and “Compare and choose” steps. The page gives a plain-English recommended upgrade plan with a before/after table per criterion, phased action steps, watch-out notes and a Markdown memo download; the trade-off charts are now in a collapsed expander.
+17. **Documentation Upkeep** — [`464db65`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/464db657a22f5b321a2998834e25671a2fc64b0d) and [`d99b728`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/d99b728ebcab7e723fa1dd13aaaeba2391877c90) (2026-11-04): refactored `CONTRIBUTIONS.md` and updated contributor profile links.
 
 </details>
 
@@ -186,6 +210,7 @@ Generated on 2026-11-04 from HEAD `1b376bd` (`1b376bdd54c70dd3c65838f4eccfa83484
 | #4 | `optimize-algorithms` | Dhruv Lad | 2026-11-03 | [`409a7d5`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/409a7d5f4df97301b162a3bbed9a90e8cf8837ad) |
 | #5 | `optimize-algorithms` | Dhruv Lad | 2026-11-03 | [`1164e79`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1164e79739296daa9478ef1528c967c3eaeb005a) |
 | #6 | `optimize-algorithms` | Dhruv Lad | 2026-11-03 | [`4ebc667`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/4ebc66796724fc31ae8c5502beb6a3320879d41a) |
+| [#7](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/pull/7) | `RishitModi/main` | RishitModi | 2026-11-14 | [`1c56c68`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1c56c68f8afb969110309e56b923b5a96dfdf4c9) |
 
 Plain merge commit: [`f87abd1`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/f87abd1f53d340815ff0fb04dfa8a8758cb38b2c), `Merge remote-tracking branch 'origin/main' into optimize-algorithms`.
 
@@ -202,7 +227,11 @@ Plain merge commit: [`f87abd1`](https://github.com/dhruvlad1/NBA-Accreditation-I
 | `src/visualization.py` | Tirth-1612 | — |
 | `data/` | Tirth-1612 | RishitModi |
 | `tests/` | Tirth-1612 | RishitModi, dhruvlad1 |
-| `app.py` | kavish310107 | — |
+| `app.py` | kavish310107 (`36badde`, `4749c99`) | RishitModi (`1582be4`), dhruvlad1 (`2b513c1`) |
+| `src/recommendation.py` | dhruvlad1 (`2b513c1`) | — |
+| `tests/test_recommendation.py` | dhruvlad1 (`2b513c1`) | — |
+| `requirements.txt` | Tirth-1612 | dhruvlad1 (pinned versions in `f35e42f`) |
+| `.python-version` | RishitModi (`1582be4`) | — |
 | `main.py` | Tirth-1612 | — |
 | `benchmark_v2.py` | dhruvlad1 | — |
 | `benchmark_final.py` | dhruvlad1 | — |
@@ -211,17 +240,27 @@ Plain merge commit: [`f87abd1`](https://github.com/dhruvlad1/NBA-Accreditation-I
 | `regression_check.py` | dhruvlad1 | — |
 | `profile_run.py` | dhruvlad1 | — |
 | `make_figures.py` | dhruvlad1 | — |
-| `README.md` | Tirth-1612 | RishitModi, kavish310107, dhruvlad1 |
+| `README.md` | Tirth-1612 | RishitModi, kavish310107, dhruvlad1 (quick-start guide in `32850dc`, live link and badge in `99a8bb8`) |
 | `report/report.md` | Tirth-1612 | dhruvlad1 |
 | `CONTRIBUTIONS.md` | kavish310107 | dhruvlad1 |
 
 ## Full commit timeline
 
 <details>
-<summary>41 commits, newest first</summary>
+<summary>51 commits, newest first</summary>
 
 | Date | Commit | Author | Type | Message |
 |---|---|---|---|---|
+| 2026-11-18 | [`0142fa5`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/0142fa58005bee01593f2dcd8e17ba11add71ac6) | Dhruv | fix | Fix recommendation page: number formatting, 1-based months, feasibility warnings, subject names, flow tests |
+| 2026-11-18 | [`2b513c1`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/2b513c1098cf97c7ee80e26a53deb6676d963ab4) | Dhruv | feat | Frontend: add actionable recommended upgrade plan with phased steps, before/after table and memo download |
+| 2026-11-18 | [`588f77b`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/588f77b5dc17105306409ad92c5b398acf5d6b3e) | Dhruv | data | final summary changes |
+| 2026-11-14 | [`1c56c68`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1c56c68f8afb969110309e56b923b5a96dfdf4c9) | RishitModi | merge | Merge pull request #7 from RishitModi/main |
+| 2026-11-14 | [`1582be4`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1582be4adc39a2b045ce87c827cff1156adb1ebe) | RishitModi | feat | frontend impeoved drastically |
+| 2026-11-14 | [`99a8bb8`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/99a8bb82746a8287fcb9c5e0860991565c99f524) | Dhruv | docs | README: add live demo link and badge |
+| 2026-11-14 | [`f35e42f`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/f35e42f70e3aff414077be5b9b619b50d5b6d955) | Dhruv | chore | Pin tested dependency versions for reproducible deployment; require Python 3.12+ |
+| 2026-11-13 | [`32850dc`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/32850dc8b643aa313cc01ed0571bcca2f81a2a95) | Dhruv | docs | README: add beginner quick-start guide for running the app |
+| 2026-11-04 | [`464db65`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/464db657a22f5b321a2998834e25671a2fc64b0d) | Dhruv | docs | CONTRIBUTIONS.md: link contributors to their GitHub profiles, simplify footnote |
+| 2026-11-04 | [`d99b728`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/d99b728ebcab7e723fa1dd13aaaeba2391877c90) | Dhruv | docs | Refactor CONTRIBUTIONS.md: add Dhruv's contributions, PR table, file ownership and full commit timeline |
 | 2026-11-04 | [`1b376bd`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/1b376bdd54c70dd3c65838f4eccfa834845a2188) | Dhruv | fix | Fix README math: add spaces around < so GitHub does not parse it as HTML |
 | 2026-11-04 | [`23edf3b`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/23edf3b96270e757c1e55a0d9d0d600e89a6a04c) | Dhruv | fix | Fix report math for GitHub: use lbrace/rbrace instead of escaped braces |
 | 2026-11-04 | [`e893cc0`](https://github.com/dhruvlad1/NBA-Accreditation-Improvement/commit/e893cc0f5a3304df2cab7845daa46642d0ea6e5b) | Dhruv | fix | Fix README math for GitHub: replace operatorname with text, use lbrace/rbrace |
@@ -275,4 +314,4 @@ git rev-list --count HEAD
 git log --no-merges --author=<name> --ignore-space-at-eol --numstat --format=
 ```
 
-For line totals, records for `results/`, `figures/` and `data/*.csv` were excluded. The full timeline is the 41-row `git log` history reachable from `HEAD`; the commit that adds this revised file is intentionally not included.
+For line totals, records for `results/`, `figures/` and `data/*.csv` were excluded. The full timeline is the 51-row `git log` history reachable from `HEAD`; the commit that adds this revised file is intentionally not included.
